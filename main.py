@@ -2,12 +2,10 @@ import comet_ml
 
 import gin
 import trax
-import trax.layers as tl
 from trax.supervised import training
 
+from models import ReformerModel
 from data_gen_np import get_generator
-from custom_positional_encoding import PositionalEncoding
-from custom_encoder_block import EncoderBlock, ExpandDim
 
 
 @gin.configurable
@@ -21,46 +19,6 @@ def get_trax_generator(num_genomes, genome_length, num_generations,
     )(generator)
     
     return serial_generator
-
-
-def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation,
-                  ff_dropout, n_layers, max_len, mode='train'):
-    encoder_blocks = [EncoderBlock(d_model=d_model,
-                                   d_ff=d_ff,
-                                   n_heads=n_heads,
-                                   attention_type=attention_type,
-                                   dropout=dropout,
-                                   ff_activation=ff_activation,
-                                   ff_dropout=ff_dropout,
-                                   mode=mode
-                                   ) for _ in range(n_layers)]
-    
-    encoder = trax.layers.Serial(
-        ExpandDim(),
-        Printer(),
-        PositionalEncoding(max_len=max_len, mode=mode),
-        tl.Dense(d_model),
-        tl.Dup(),
-        tl.ReversibleSerial(encoder_blocks),
-        tl.Concatenate(),
-        tl.Dense(d_model),
-        tl.LogSoftmax()
-    )
-    
-    return encoder
-
-
-def Printer():
-    from trax.fastmath import numpy as jnp
-    layer_name = "Printer"
-    
-    def func(x, y):
-        return x, y
-    
-    return tl.Fn(layer_name, func, n_out=2)
-
-
-ReformerModel = trax.models.model_configure(ReformerModel)
 
 
 @gin.configurable

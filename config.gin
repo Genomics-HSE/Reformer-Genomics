@@ -16,7 +16,7 @@ main.train.lr = 0.01
 main.train.n_warmup_steps = 1000
 main.train.n_steps_per_checkpoint = 10
 main.train.output_dir = "output"
-main.train.n_steps = 10
+main.train.n_steps = 100
 
 ReformerModel.d_model = %num_generations
 ReformerModel.d_ff = %num_generations

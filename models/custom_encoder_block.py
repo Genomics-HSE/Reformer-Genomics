@@ -90,11 +90,4 @@ def _InsertAxes12():
                  lambda x: jnp.reshape(x, (x.shape[0], 1, 1, x.shape[1])))
 
 
-def ExpandDim():
-    layer_name = "ExpandDim"
-    
-    def func(x):
-        x = x.astype(jnp.float32)
-        return jnp.expand_dims(x, axis=-1) #, jnp.expand_dims(y, axis=2)
-    
-    return tl.Fn(layer_name, func, n_out=1)
+
