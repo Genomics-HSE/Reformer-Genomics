@@ -1,4 +1,4 @@
 import trax
-from reformer import ReformerModel
+import reformer
 
-ReformerModel = trax.models.model_configure(ReformerModel)
+ReformerModel = trax.models.model_configure(reformer.ReformerModel)
