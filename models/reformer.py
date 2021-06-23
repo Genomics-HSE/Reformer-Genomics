@@ -2,8 +2,8 @@ import trax
 import trax.layers as tl
 from trax.fastmath import numpy as jnp
 
-from custom_encoder_block import EncoderBlock
-from custom_positional_encoding import PositionalEncoding
+from models.custom_encoder_block import EncoderBlock
+from models.custom_positional_encoding import PositionalEncoding
 
 
 def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation,
