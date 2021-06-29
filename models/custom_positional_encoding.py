@@ -77,7 +77,7 @@ class PositionalEncoding(base.Layer):
                 px = fastmath.dynamic_slice_in_dim(weights, start, symbol_size,
                                                    axis=1)
             if self._dropout == 0:
-                return jnp.concatenate((x, px), axis=-1)
+                return jnp.array(jnp.concatenate((x, px), axis=-1))
             else:
                 noise_shape = list(px.shape)
                 for dim in self._dropout_broadcast_dims:
@@ -86,7 +86,7 @@ class PositionalEncoding(base.Layer):
                 keep = fastmath.random.bernoulli(self.rng, keep_prob,
                                                  tuple(noise_shape))
                 multiplier = keep.astype(x.dtype) / keep_prob
-                return jnp.concatenate((x, px * multiplier), axis=-1)
+                return jnp.array(jnp.concatenate((x, px * multiplier), axis=-1))
         else:
             if self._dropout != 0:
                 raise ValueError(f'In predict mode, but dropout rate '
@@ -99,7 +99,7 @@ class PositionalEncoding(base.Layer):
             emb = fastmath.dynamic_slice_in_dim(
                 weights, self.state, inputs.shape[1], axis=1)
             self.state += inputs.shape[1]
-            return jnp.concatenate(inputs, emb)
+            return jnp.array(jnp.concatenate((inputs, emb), axis=-1))
     
     def init_weights_and_state(self, input_signature):
         """Randomly initializes the positional encoding vectors.
