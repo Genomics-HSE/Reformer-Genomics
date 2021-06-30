@@ -27,3 +27,5 @@ if __name__ == '__main__':
                 model_path=args.path,
                 data_generator=predict_gen
                 )
+    else:
+        ValueError("Choose train or predict")
