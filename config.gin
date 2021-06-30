@@ -2,7 +2,7 @@ import trax
 import trax.layers
 import main
 
-genome_length = 3000
+genome_length = 300
 num_generations = 32
 
 get_trax_generator.num_genomes = 100000
@@ -13,10 +13,12 @@ get_trax_generator.num_demography = 1
 get_trax_generator.batch_size = 1
 
 models.utils.train.lr = 0.01
-models.utils.train.n_warmup_steps = 1000
+models.utils.train.n_warmup_steps = 1
 models.utils.train.n_steps_per_checkpoint = 10
 models.utils.train.output_dir = "output"
 models.utils.train.n_steps = 3
+
+models.utils.predict.num_genomes = 10
 
 ReformerModel.d_model = %num_generations
 ReformerModel.d_ff = %num_generations
@@ -25,7 +27,7 @@ ReformerModel.attention_type = @LSHSelfAttention
 ReformerModel.dropout = 0.0
 ReformerModel.ff_activation = @trax.layers.Relu
 ReformerModel.ff_dropout = 0.1
-ReformerModel.n_layers = 10
+ReformerModel.n_layers = 2
 ReformerModel.max_len = %genome_length
 
 LSHSelfAttention.chunk_len = 5

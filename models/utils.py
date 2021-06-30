@@ -2,14 +2,13 @@ from os.path import join
 import gin
 import trax
 import trax.layers as tl
-from .data_gen_np import get_generator
 from trax.supervised import training
 from trax.fastmath import numpy as jnp
 import scipy
-
 import matplotlib.pyplot as plt
-from .viz import make_coalescent_heatmap
 
+from .viz import make_coalescent_heatmap
+from .data_gen_np import get_generator
 
 
 @gin.configurable
@@ -31,7 +30,7 @@ def train(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_checkpoin
         n_warmup_steps=n_warmup_steps, max_value=lr)
     train_task = training.TrainTask(
         labeled_data=train_gen,
-        loss_layer=tl.CategoryCrossEntropy(),
+        loss_layer=KL_DIV(),
         optimizer=trax.optimizers.Adam(lr),
         lr_schedule=lr_schedule,
         n_steps_per_checkpoint=n_steps_per_checkpoint
@@ -39,7 +38,7 @@ def train(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_checkpoin
     
     eval_task = training.EvalTask(
         labeled_data=train_gen,
-        metrics=[tl.CategoryCrossEntropy()]
+        metrics=[KL_DIV()]
     )
     
     loop = training.Loop(model=model,
@@ -67,3 +66,32 @@ def predict(model, model_path, data_generator, num_genomes, genome_length=1, min
         figure = make_coalescent_heatmap("", (predictions, y))
         plt.savefig(join("output/plots", str(i)))
         plt.close(figure)
+
+
+@gin.configurable(denylist=['logpred', 'target'])
+def kl_div(logpred, target, eps=jnp.finfo(jnp.float32).eps):
+    """Calculate KL-divergence."""
+    return jnp.sum(target * (jnp.log(target + eps) - logpred))
+
+
+kl_div = tl.layer_configure(kl_div)
+
+
+def KL_DIV():
+    def f(model_output, targets):
+        if len(targets.shape) < 3:
+            # one hot encoding
+            targets = one_hot_encoding_numpy(targets, model_output.shape[-1])
+        divergence = kl_div(model_output, targets)
+        return jnp.average(divergence)
+    
+    return tl.base.Fn("KL_DIV", f)
+
+
+def one_hot_encoding_numpy(y_data, num_class):
+    """
+    
+    :param batch_data: (batch_size, seq_len)
+    :return:
+    """
+    return jnp.arange(num_class) == y_data[..., None].astype(jnp.float32)

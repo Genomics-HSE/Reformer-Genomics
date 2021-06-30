@@ -9,7 +9,7 @@ if __name__ == '__main__':
     train_parser = action_parsers.add_parser('train')
     
     predict_parser = action_parsers.add_parser('predict')
-    predict_parser.add_argument('--path', type=int)
+    predict_parser.add_argument('--path', type=str)
     args = parser.parse_args()
 
     gin.parse_config_file("config.gin")
@@ -24,7 +24,6 @@ if __name__ == '__main__':
     elif args.action == "predict":
         predict_gen = get_trax_generator(random_seed=34)
         predict(model=ReformerModel(mode='predict'),
-                model_path="model.pkl.gz",
-                data_generator=predict_gen,
-                
+                model_path=args.path,
+                data_generator=predict_gen
                 )
