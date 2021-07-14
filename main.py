@@ -5,6 +5,7 @@ from models import ReformerModel, get_trax_generator, train, predict
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Genomics')
+    parser.add_argument("--config", type=str, default="")
     action_parsers = parser.add_subparsers(title='actions', dest='action')
     train_parser = action_parsers.add_parser('train')
     

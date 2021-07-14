@@ -7,7 +7,7 @@ from .custom_positional_encoding import PositionalEncoding
 
 
 def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation,
-                  ff_dropout, n_layers, max_len, mode='train'):
+                  ff_dropout, n_layers, max_len, filters, kernel_size, stride, mode='train'):
     encoder_blocks = [EncoderBlock(d_model=d_model,
                                    d_ff=d_ff,
                                    n_heads=n_heads,
@@ -20,6 +20,7 @@ def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation
     
     encoder = trax.layers.Serial(
         ExpandDim(),
+        tl.Conv1d(filters=filters, kernel_size=kernel_size, stride=stride, padding="SAME"),
         PositionalEncoding(max_len=max_len, mode=mode),
         tl.Dense(d_model),
         tl.Dup(),
