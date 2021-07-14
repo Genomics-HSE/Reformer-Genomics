@@ -13,7 +13,7 @@ if __name__ == '__main__':
     predict_parser.add_argument('--path', type=str)
     args = parser.parse_args()
 
-    gin.parse_config_file("config.gin")
+    gin.parse_config_file(args.config)
 
     train_gen = get_trax_generator()
     comet_exp = comet_ml.OfflineExperiment(project_name="population-genomics-new",
