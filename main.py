@@ -26,7 +26,8 @@ if __name__ == '__main__':
         predict_gen = get_trax_generator(random_seed=34)
         predict(model=ReformerModel(mode='predict'),
                 model_path=args.path,
-                data_generator=predict_gen
+                data_generator=predict_gen,
+                num_genomes=10
                 )
     else:
         ValueError("Choose train or predict")
