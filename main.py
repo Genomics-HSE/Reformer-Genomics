@@ -27,7 +27,8 @@ if __name__ == '__main__':
         predict(model=ReformerModel(mode='predict'),
                 model_path=args.path,
                 data_generator=predict_gen,
-                num_genomes=10
+                num_genomes=10,
+                plot_length=int(500)
                 )
     else:
         ValueError("Choose train or predict")

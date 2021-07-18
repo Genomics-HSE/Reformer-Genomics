@@ -30,7 +30,7 @@ def train(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_checkpoin
         n_warmup_steps=n_warmup_steps, max_value=lr)
     train_task = training.TrainTask(
         labeled_data=train_gen,
-        loss_layer=KL_DIV(),
+        loss_layer=tl.CategoryCrossEntropy(),  # KL_DIV()
         optimizer=trax.optimizers.Adam(lr),
         lr_schedule=lr_schedule,
         n_steps_per_checkpoint=n_steps_per_checkpoint
@@ -52,7 +52,7 @@ def train(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_checkpoin
 
 
 @gin.configurable
-def predict(model, model_path, data_generator, num_genomes, genome_length=1, min_length_to_plot=300000):
+def predict(model, model_path, data_generator, num_genomes, plot_length=-1, genome_length=1, min_length_to_plot=300000):
     model.init_from_file(model_path, weights_only=True)
     
     for i in range(num_genomes):
@@ -63,9 +63,16 @@ def predict(model, model_path, data_generator, num_genomes, genome_length=1, min
         predictions = jnp.exp(jnp.squeeze(predictions, 0).T)
         y = jnp.squeeze(y, 0)
         
-        figure = make_coalescent_heatmap("", (predictions, y))
-        plt.savefig(join("output/plots", str(i)))
-        plt.close(figure)
+        if plot_length == -1:
+            plot_length = len(y)
+        num_plots = int(len(y) / plot_length)
+        
+        ptr = 0
+        for j in range(num_plots):
+            figure = make_coalescent_heatmap("", (predictions[:, ptr:ptr + plot_length], y[ptr:ptr + plot_length]))
+            plt.savefig(join("output/plots500", str(i) + "_" + str(j)))
+            plt.close(figure)
+            ptr += plot_length
 
 
 @gin.configurable(denylist=['logpred', 'target'])
