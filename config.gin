@@ -23,17 +23,29 @@ models.utils.predict.num_genomes = 100
 ReformerModel.d_model = %num_generations
 ReformerModel.d_ff = %num_generations
 ReformerModel.n_heads = 1
-ReformerModel.attention_type = @LSHSelfAttention
-ReformerModel.dropout = 0.1
-ReformerModel.ff_activation = @trax.layers.Relu
-ReformerModel.ff_dropout = 0.1
-ReformerModel.n_layers = 5
 ReformerModel.max_len = %genome_length
 
 ReformerModel.filters = 32
 ReformerModel.kernel_size = 10
 ReformerModel.stride = 1
 
+ReformerModel.attention_type = @trax.layers.SelfAttention #@LSHSelfAttention
+ReformerModel.dropout = 0.1
+ReformerModel.ff_activation = @trax.layers.Relu
+ReformerModel.ff_dropout = 0.1
+ReformerModel.n_layers = 5
 
 LSHSelfAttention.chunk_len = 5
 LSHSelfAttention.n_buckets = 10
+
+trax.layers.SelfAttention.n_heads = 1
+trax.layers.SelfAttention.d_qk = 32
+trax.layers.SelfAttention.d_v = 32
+trax.layers.SelfAttention.share_qk = True
+trax.layers.SelfAttention.chunk_len = 10000
+trax.layers.SelfAttention.n_chunks_before = 1
+trax.layers.SelfAttention.n_chunks_after = 1
+trax.layers.SelfAttention.mode = 'train'
+trax.layers.SelfAttention.attention_dropout = 0.1
+trax.layers.SelfAttention.output_dropout = 0.1
+trax.layers.SelfAttention.n_parallel_heads = 1
