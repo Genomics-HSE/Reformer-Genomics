@@ -45,7 +45,6 @@ trax.layers.SelfAttention.share_qk = True
 trax.layers.SelfAttention.chunk_len = 10000
 trax.layers.SelfAttention.n_chunks_before = 1
 trax.layers.SelfAttention.n_chunks_after = 1
-trax.layers.SelfAttention.mode = 'train'
 trax.layers.SelfAttention.attention_dropout = 0.1
 trax.layers.SelfAttention.output_dropout = 0.1
 trax.layers.SelfAttention.n_parallel_heads = 1
