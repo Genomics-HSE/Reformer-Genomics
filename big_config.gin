@@ -3,13 +3,12 @@ import trax.layers
 import main
 
 genome_length = 3000000
-num_generations = 32
+dim = 32
 
 get_trax_generator.num_genomes = 100000
 get_trax_generator.genome_length = %genome_length
-get_trax_generator.num_generations = %num_generations
+get_trax_generator.num_generators = 10
 get_trax_generator.random_seed = 42
-get_trax_generator.num_demography = 1
 get_trax_generator.batch_size = 1
 
 models.utils.train.lr = 0.1
@@ -20,8 +19,8 @@ models.utils.train.n_steps = 100
 
 models.utils.predict.num_genomes = 100
 
-ReformerModel.d_model = %num_generations
-ReformerModel.d_ff = %num_generations
+ReformerModel.d_model = %dim
+ReformerModel.d_ff = %dim
 ReformerModel.n_heads = 1
 ReformerModel.max_len = %genome_length
 

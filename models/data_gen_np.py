@@ -210,7 +210,7 @@ class DataGenerator():
             prior_dist[self.splitter(
                 time, self.number_intervals)] += (int(right - left)) / self.len
         
-        return mutations, d_times #, prior_dist
+        return mutations, d_times  # , prior_dist
 
 
 def get_generator(num_genomes: int,
@@ -222,6 +222,17 @@ def get_generator(num_genomes: int,
                               demographic_events=generate_demographic_events(),
                               random_seed=random_seed + i,
                               ) for i in range(num_generators)]
+
+
+def get_list_of_generators(num_genomes: int,
+                           genome_length: int,
+                           num_generators: int = 1,
+                           random_seed: int = 42) -> 'List[DataGenerator]':
+    return [DataGenerator(lengt=genome_length,
+                          num_replicates=num_genomes,
+                          demographic_events=generate_demographic_events(),
+                          random_seed=random_seed + i,
+                          ) for i in range(num_generators)]
 
 
 if __name__ == "__main__":

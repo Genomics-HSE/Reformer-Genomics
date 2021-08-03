@@ -1,4 +1,6 @@
+import random
 from os.path import join
+from typing import Any, List
 import gin
 import trax
 import trax.layers as tl
@@ -8,20 +10,7 @@ import scipy
 import matplotlib.pyplot as plt
 
 from .viz import make_coalescent_heatmap
-from .data_gen_np import get_generator
-
-
-@gin.configurable
-def get_trax_generator(num_genomes, genome_length, num_generations,
-                       random_seed, num_demography, batch_size):
-    generator = get_generator(num_genomes=num_genomes, genome_length=genome_length, num_generators=num_generations,
-                              random_seed=random_seed)
-    generator = next(generator)
-    serial_generator = trax.data.Serial(
-        trax.data.Batch(batch_size)
-    )(generator)
-    
-    return serial_generator
+from .data_gen_np import get_generator, get_list_of_generators
 
 
 @gin.configurable
@@ -73,6 +62,50 @@ def predict(model, model_path, data_generator, num_genomes, plot_length=-1, geno
             plt.savefig(join("output/plots500", str(i) + "_" + str(j)))
             plt.close(figure)
             ptr += plot_length
+
+
+@gin.configurable
+def get_trax_generator(num_genomes, genome_length, num_generators,
+                       random_seed, batch_size):
+    generators = get_list_of_generators(num_genomes=num_genomes, genome_length=genome_length,
+                                        num_generators=num_generators,
+                                        random_seed=random_seed)
+    
+    generator = MixGenerator(generators, num_genomes)
+    
+    serial_generator = trax.data.Serial(
+        trax.data.Batch(batch_size)
+    )(generator)
+    
+    return serial_generator
+
+
+class MixGenerator:
+    def __init__(self, list_of_generators: List[Any], examples_in_one_gen: int):
+        self.list_of_generators = list_of_generators
+        self.examples_in_one_gen = examples_in_one_gen
+        self.total_examples = len(list_of_generators) * self.examples_in_one_gen
+        self.counter = {i: 0 for i in range(len(list_of_generators))}
+    
+    def __iter__(self):
+        self.i = 0
+        return self
+    
+    def __next__(self):
+        if self.i < self.total_examples:
+            random_gen_index = random.randint(0, len(self.list_of_generators)-1)
+            generator = self.list_of_generators[random_gen_index]
+            sample = next(generator)
+            
+            self.counter[random_gen_index] += 1
+            self.i += 1
+            
+            if self.counter[random_gen_index] == self.examples_in_one_gen:
+                self.list_of_generators.remove(generator)
+            
+            return sample
+        else:
+            raise StopIteration
 
 
 @gin.configurable(denylist=['logpred', 'target'])
