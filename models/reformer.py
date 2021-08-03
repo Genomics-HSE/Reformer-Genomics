@@ -26,7 +26,7 @@ def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation
         tl.Dup(),
         tl.ReversibleSerial(encoder_blocks),
         tl.Concatenate(),
-        tl.Dense(d_model),
+        tl.Dense(32),
         tl.LogSoftmax(),
     )
     
