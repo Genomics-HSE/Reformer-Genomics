@@ -59,7 +59,7 @@ def predict(model, model_path, data_generator, num_genomes, plot_length=-1, geno
         ptr = 0
         for j in range(num_plots):
             figure = make_coalescent_heatmap("", (predictions[:, ptr:ptr + plot_length], y[ptr:ptr + plot_length]))
-            plt.savefig(join("output/plots500", str(i) + "_" + str(j)))
+            plt.savefig(join("output01/plots", str(i) + "_" + str(j)))
             plt.close(figure)
             ptr += plot_length
 

@@ -28,7 +28,7 @@ if __name__ == '__main__':
                 model_path=args.path,
                 data_generator=predict_gen,
                 num_genomes=10,
-                plot_length=int(1000)
+                plot_length=int(10000)
                 )
     else:
         ValueError("Choose train or predict")
