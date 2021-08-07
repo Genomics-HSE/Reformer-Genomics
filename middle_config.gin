@@ -1,0 +1,49 @@
+import trax
+import trax.layers
+import main
+
+genome_length = 30000
+dim = 32
+
+get_trax_generator.num_genomes = 100000
+get_trax_generator.genome_length = %genome_length
+get_trax_generator.num_generators = 10
+get_trax_generator.random_seed = 42
+get_trax_generator.batch_size = 32
+
+models.utils.train.lr = 0.1
+models.utils.train.n_warmup_steps = 1
+models.utils.train.n_steps_per_checkpoint = 10
+models.utils.train.output_dir = "m_output"
+models.utils.train.n_steps = 100
+
+models.utils.predict.num_genomes = 100
+
+ReformerModel.d_model = %dim
+ReformerModel.d_ff = %dim
+ReformerModel.n_heads = 1
+ReformerModel.max_len = %genome_length
+
+ReformerModel.filters = 32
+ReformerModel.kernel_size = 10
+ReformerModel.stride = 1
+
+ReformerModel.attention_type = @trax.layers.SelfAttention #@LSHSelfAttention
+ReformerModel.dropout = 0.1
+ReformerModel.ff_activation = @trax.layers.Relu
+ReformerModel.ff_dropout = 0.1
+ReformerModel.n_layers = 5 
+
+LSHSelfAttention.chunk_len = 100 
+LSHSelfAttention.n_buckets = 1000
+
+trax.layers.SelfAttention.n_heads = 1
+trax.layers.SelfAttention.d_qk = 32
+trax.layers.SelfAttention.d_v = 32
+trax.layers.SelfAttention.share_qk = True
+trax.layers.SelfAttention.chunk_len = 2000
+trax.layers.SelfAttention.n_chunks_before = 1
+trax.layers.SelfAttention.n_chunks_after = 1
+trax.layers.SelfAttention.attention_dropout = 0.1
+trax.layers.SelfAttention.output_dropout = 0.1
+trax.layers.SelfAttention.n_parallel_heads = 1

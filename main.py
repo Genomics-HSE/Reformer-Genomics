@@ -18,7 +18,7 @@ if __name__ == '__main__':
     train_gen = get_trax_generator()
     comet_exp = comet_ml.OfflineExperiment(project_name="population-genomics-new",
                                            workspace="kenenbek",
-                                           offline_directory="output/")
+                                           offline_directory="m_output/")
     
     if args.action == "train":
         train(model=ReformerModel(), train_gen=train_gen, comet_exp=comet_exp)
