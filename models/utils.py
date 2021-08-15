@@ -41,7 +41,7 @@ def train_model(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_che
 
 
 @gin.configurable
-def predict(model, model_path, data_gen, num_genomes, plot_dir, plot_length=-1, genome_length=1, min_length_to_plot=300000):
+def predict_model(model, model_path, data_gen, num_genomes, plot_dir, plot_length=-1, genome_length=1, min_length_to_plot=300000):
     model.init_from_file(model_path, weights_only=True)
     
     for i in range(num_genomes):

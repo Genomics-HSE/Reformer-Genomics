@@ -1,7 +1,7 @@
 include "configs/config.gin"
 
 train_model.model = @train/GruModel()
-predict.model = @predict/GruModel()
+predict_model.model = @predict/GruModel()
 
 train/GruModel.mode = "train"
 predict/GruModel.mode = "predict"
