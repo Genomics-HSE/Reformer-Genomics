@@ -6,7 +6,7 @@ output = "output"
 genome_length = 30000
 dim = 32
 
-train_model.lr = 0.01
+train_model.lr = 0.001
 train_model.n_warmup_steps = 1
 train_model.n_steps_per_checkpoint = 10
 train_model.output_dir = %output
