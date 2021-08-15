@@ -1,0 +1,33 @@
+import trax
+import trax.layers
+import models
+
+output = "output"
+genome_length = 30
+dim = 32
+
+train_model.lr = 0.01
+train_model.n_warmup_steps = 1
+train_model.n_steps_per_checkpoint = 5
+train_model.output_dir = %output
+train_model.n_steps = 5
+
+train_model.comet_exp = @OfflineExperiment()
+OfflineExperiment.project_name = "population-genomics-new"
+OfflineExperiment.workspace = "kenenbek"
+OfflineExperiment.offline_directory = %output
+
+train_model.train_gen = @train/get_trax_generator()
+train/get_trax_generator.random_seed = 42
+train/get_trax_generator.batch_size = 1
+get_trax_generator.num_genomes = 100000
+get_trax_generator.genome_length = %genome_length
+get_trax_generator.num_generators = 10
+
+predict.data_gen = @predict/get_trax_generator()
+predict/get_trax_generator.random_seed = 34
+predict/get_trax_generator.batch_size = 1
+
+predict.num_genomes = 10
+predict.plot_length = %genome_length
+predict.plot_dir = %output

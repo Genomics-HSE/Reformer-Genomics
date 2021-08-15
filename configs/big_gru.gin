@@ -1,0 +1,11 @@
+include "configs/big_config.gin"
+
+train_model.model = @train/GruModel()
+predict.model = @predict/GruModel()
+
+train/GruModel.mode = "train"
+predict/GruModel.mode = "predict"
+
+GruModel.d_model = 32
+GruModel.vocab_size = 2
+GruModel.n_units = 32

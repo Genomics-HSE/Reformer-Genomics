@@ -1,7 +1,8 @@
 import comet_ml
 import gin
 import argparse
-from models import ReformerModel, get_trax_generator, train, predict
+from models import train_model, predict
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Genomics')
@@ -14,21 +15,15 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     gin.parse_config_file(args.config)
-
-    train_gen = get_trax_generator()
-    comet_exp = comet_ml.OfflineExperiment(project_name="population-genomics-new",
-                                           workspace="kenenbek",
-                                           offline_directory="m_output/")
     
     if args.action == "train":
-        train(model=ReformerModel(), train_gen=train_gen, comet_exp=comet_exp)
+        train_model(model=gin.REQUIRED, train_gen=gin.REQUIRED, comet_exp=gin.REQUIRED,
+                    lr=gin.REQUIRED, n_warmup_steps=gin.REQUIRED, n_steps_per_checkpoint=gin.REQUIRED,
+                    output_dir=gin.REQUIRED, n_steps=gin.REQUIRED)
     elif args.action == "predict":
-        predict_gen = get_trax_generator(random_seed=34)
-        predict(model=ReformerModel(mode='predict'),
-                model_path=args.path,
-                data_generator=predict_gen,
-                num_genomes=10,
-                plot_length=int(10000)
+        predict(model_path=args.path, model=gin.REQUIRED,
+                data_gen=gin.REQUIRED, num_genomes=gin.REQUIRED,
+                plot_dir=gin.REQUIRED, plot_length=gin.REQUIRED
                 )
     else:
         ValueError("Choose train or predict")

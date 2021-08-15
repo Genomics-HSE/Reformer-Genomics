@@ -18,8 +18,9 @@ def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation
                                    mode=mode
                                    ) for _ in range(n_layers)]
     
-    encoder = trax.layers.Serial(
+    encoder = tl.Serial(
         ExpandDim(),
+        #Printer(),
         tl.Conv1d(filters=filters, kernel_size=kernel_size, stride=stride, padding="SAME"),
         PositionalEncoding(max_len=max_len, mode=mode),
         tl.Dense(d_model),
@@ -33,11 +34,24 @@ def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation
     return encoder
 
 
+def GruModel(d_model, vocab_size, n_units, mode):
+    model = tl.Serial(
+        tl.Embedding(vocab_size, d_model),
+        tl.GRU(n_units, mode),
+        tl.Dense(d_model),
+        tl.Relu(),
+        tl.Dense(d_model),
+        tl.LogSoftmax()
+    )
+    return model
+
+
 def Printer():
     from trax.fastmath import numpy as jnp
     layer_name = "Printer"
     
     def func(x, y):
+        print(x.shape, y.shape)
         return x, y
     
     return tl.Fn(layer_name, func, n_out=2)

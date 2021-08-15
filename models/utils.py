@@ -14,7 +14,7 @@ from .data_gen_np import get_generator, get_list_of_generators
 
 
 @gin.configurable
-def train(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_checkpoint, output_dir, n_steps):
+def train_model(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_checkpoint, output_dir, n_steps):
     lr_schedule = trax.lr.warmup_and_rsqrt_decay(
         n_warmup_steps=n_warmup_steps, max_value=lr)
     train_task = training.TrainTask(
@@ -41,11 +41,11 @@ def train(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_checkpoin
 
 
 @gin.configurable
-def predict(model, model_path, data_generator, num_genomes, plot_length=-1, genome_length=1, min_length_to_plot=300000):
+def predict(model, model_path, data_gen, num_genomes, plot_dir, plot_length=-1, genome_length=1, min_length_to_plot=300000):
     model.init_from_file(model_path, weights_only=True)
     
     for i in range(num_genomes):
-        data = next(data_generator)
+        data = next(data_gen)
         X, y = data
         
         predictions = model(X)
@@ -59,7 +59,7 @@ def predict(model, model_path, data_generator, num_genomes, plot_length=-1, geno
         ptr = 0
         for j in range(num_plots):
             figure = make_coalescent_heatmap("", (predictions[:, ptr:ptr + plot_length], y[ptr:ptr + plot_length]))
-            plt.savefig(join("output01/plots", str(i) + "_" + str(j)))
+            plt.savefig(join(plot_dir, "plots", str(i) + "_" + str(j)))
             plt.close(figure)
             ptr += plot_length
 
