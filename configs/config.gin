@@ -3,7 +3,6 @@ import trax.layers
 import models
 
 output = "output"
-genome_length = 30
 dim = 32
 
 train_model.lr = 0.01
@@ -20,14 +19,15 @@ OfflineExperiment.offline_directory = %output
 train_model.train_gen = @train/get_trax_generator()
 train/get_trax_generator.random_seed = 42
 train/get_trax_generator.batch_size = 1
+train/get_trax_generator.genome_length = 30
 get_trax_generator.num_genomes = 100000
-get_trax_generator.genome_length = %genome_length
 get_trax_generator.num_generators = 10
 
-predict.data_gen = @predict/get_trax_generator()
+predict_model.data_gen = @predict/get_trax_generator()
 predict/get_trax_generator.random_seed = 34
 predict/get_trax_generator.batch_size = 1
+predict/get_trax_generator.genome_length = 300
 
-predict.num_genomes = 10
-predict.plot_length = %genome_length
-predict.plot_dir = %output
+predict_model.num_genomes = 10
+predict_model.plot_length = 300
+predict_model.plot_dir = %output
