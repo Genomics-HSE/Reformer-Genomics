@@ -1,6 +1,7 @@
 import trax
 import trax.layers as tl
 from trax.fastmath import numpy as jnp
+import copy
 
 from .custom_encoder_block import EncoderBlock
 from .custom_positional_encoding import PositionalEncoding
@@ -37,13 +38,37 @@ def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation
 def GruModel(d_model, vocab_size, n_units, mode):
     model = tl.Serial(
         tl.Embedding(vocab_size, d_model),
-        tl.GRU(n_units, mode),
+        Bidirectional(tl.GRU(n_units, mode)),
         tl.Dense(d_model),
         tl.Relu(),
         tl.Dense(d_model),
         tl.LogSoftmax()
     )
     return model
+
+
+def Bidirectional(forward_layer, axis=1, merge_layer=tl.Concatenate()):
+    """Bidirectional combinator for RNNs.
+    Args:
+      forward_layer: A layer, such as `trax.layers.LSTM` or `trax.layers.GRU`.
+      axis: a time axis of the inputs. Default value is `1`.
+      merge_layer: A combinator used to combine outputs of the forward
+        and backward RNNs. Default value is 'trax.layers.Concatenate'.
+    Example:
+        Bidirectional(RNN(n_units=8))
+    """
+    backward_layer = copy.deepcopy(forward_layer)
+    flip = tl.base.Fn('_FlipAlongTimeAxis', lambda x: jnp.flip(x, axis=axis))
+    backward = tl.Serial(
+        flip,
+        backward_layer,
+        flip,
+    )
+    
+    return tl.Serial(
+        tl.Branch(forward_layer, backward),
+        merge_layer,
+    )
 
 
 def Printer():
