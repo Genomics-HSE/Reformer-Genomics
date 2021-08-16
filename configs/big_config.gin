@@ -26,8 +26,9 @@ get_trax_generator.num_generators = 10
 predict_model.data_gen = @predict/get_trax_generator()
 predict/get_trax_generator.random_seed = 34
 predict/get_trax_generator.batch_size = 1
-predict/get_trax_generator.genome_length = 3000000
+predict/get_trax_generator.genome_length = 3000000000
 
-predict_model.num_genomes = 10
+predict_model.comet_exp = @OfflineExperiment()
+predict_model.num_genomes = 1
 predict_model.plot_length = 3000000
 predict_model.plot_dir = %output

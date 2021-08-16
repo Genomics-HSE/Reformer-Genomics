@@ -21,7 +21,7 @@ if __name__ == '__main__':
                     output_dir=gin.REQUIRED, n_steps=gin.REQUIRED)
     elif args.action == "predict":
         predict_model(model_path=args.path, model=gin.REQUIRED,
-                      data_gen=gin.REQUIRED, num_genomes=gin.REQUIRED,
+                      data_gen=gin.REQUIRED, comet_exp=gin.REQUIRED, num_genomes=gin.REQUIRED,
                       plot_dir=gin.REQUIRED, plot_length=gin.REQUIRED
                       )
     else:

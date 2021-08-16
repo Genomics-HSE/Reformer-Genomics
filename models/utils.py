@@ -41,7 +41,7 @@ def train_model(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_che
 
 
 @gin.configurable
-def predict_model(model, model_path, data_gen, num_genomes, plot_dir, plot_length=-1, plot=True):
+def predict_model(model, model_path, data_gen, comet_exp, num_genomes, plot_dir, plot_length=-1, plot=True):
     model.init_from_file(model_path, weights_only=True)
     
     res = []
@@ -50,7 +50,8 @@ def predict_model(model, model_path, data_gen, num_genomes, plot_dir, plot_lengt
         data = next(data_gen)
         X, y = data
         
-        predictions = model(X)
+        with comet_exp.eval():
+            predictions = model(X)
         predictions = jnp.exp(jnp.squeeze(predictions, 0).T)
         y = jnp.squeeze(y, 0)
         
