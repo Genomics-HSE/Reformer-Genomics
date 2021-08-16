@@ -41,8 +41,10 @@ def train_model(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_che
 
 
 @gin.configurable
-def predict_model(model, model_path, data_gen, num_genomes, plot_dir, plot_length=-1, genome_length=1, min_length_to_plot=300000):
+def predict_model(model, model_path, data_gen, num_genomes, plot_dir, plot_length=-1, plot=True):
     model.init_from_file(model_path, weights_only=True)
+    
+    res = []
     
     for i in range(num_genomes):
         data = next(data_gen)
@@ -52,16 +54,21 @@ def predict_model(model, model_path, data_gen, num_genomes, plot_dir, plot_lengt
         predictions = jnp.exp(jnp.squeeze(predictions, 0).T)
         y = jnp.squeeze(y, 0)
         
-        if plot_length == -1:
-            plot_length = len(y)
-        num_plots = int(len(y) / plot_length)
+        res.append(predictions)
         
-        ptr = 0
-        for j in range(num_plots):
-            figure = make_coalescent_heatmap("", (predictions[:, ptr:ptr + plot_length], y[ptr:ptr + plot_length]))
-            plt.savefig(join(plot_dir, "plots", str(i) + "_" + str(j)))
-            plt.close(figure)
-            ptr += plot_length
+        if plot:
+            if plot_length == -1:
+                plot_length = len(y)
+            num_plots = int(len(y) / plot_length)
+            
+            ptr = 0
+            for j in range(num_plots):
+                figure = make_coalescent_heatmap("", (predictions[:, ptr:ptr + plot_length], y[ptr:ptr + plot_length]))
+                plt.savefig(join(plot_dir, "plots", str(i) + "_" + str(j)))
+                plt.close(figure)
+                ptr += plot_length
+    
+    return res
 
 
 @gin.configurable
