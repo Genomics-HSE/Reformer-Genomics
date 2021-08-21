@@ -10,10 +10,9 @@ import scipy
 import matplotlib.pyplot as plt
 
 from .viz import make_coalescent_heatmap
-from .data_gen_np import get_generator, get_list_of_generators
+from .data_gen_np import get_liner_generator
 
 
-@gin.configurable
 def train_model(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_checkpoint, output_dir, n_steps):
     lr_schedule = trax.lr.warmup_and_rsqrt_decay(
         n_warmup_steps=n_warmup_steps, max_value=lr)
@@ -29,7 +28,6 @@ def train_model(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_che
         labeled_data=train_gen,
         metrics=[KL_DIV()]
     )
-    
     loop = training.Loop(model=model,
                          tasks=train_task,
                          eval_tasks=eval_task,
@@ -40,17 +38,15 @@ def train_model(model, train_gen, comet_exp, lr, n_warmup_steps, n_steps_per_che
         loop.run(n_steps=n_steps)
 
 
-@gin.configurable
 def predict_model(model, model_path, data_gen, comet_exp, num_genomes, plot_dir, plot_length=-1, plot=True):
     model.init_from_file(model_path, weights_only=True)
-    
     res = []
     
     for i in range(num_genomes):
         data = next(data_gen)
         X, y = data
         
-        with comet_exp.eval():
+        with comet_exp.test():
             predictions = model(X)
         predictions = jnp.exp(jnp.squeeze(predictions, 0).T)
         y = jnp.squeeze(y, 0)
@@ -65,25 +61,23 @@ def predict_model(model, model_path, data_gen, comet_exp, num_genomes, plot_dir,
             ptr = 0
             for j in range(num_plots):
                 figure = make_coalescent_heatmap("", (predictions[:, ptr:ptr + plot_length], y[ptr:ptr + plot_length]))
-                plt.savefig(join(plot_dir, "plots", str(i) + "_" + str(j)))
+                plt.savefig(join(plot_dir, str(i) + "_" + str(j)))
                 plt.close(figure)
                 ptr += plot_length
     
-    return res
+    return None
 
 
-@gin.configurable
 def get_trax_generator(num_genomes, genome_length, num_generators,
                        random_seed, batch_size):
-    generators = get_list_of_generators(num_genomes=num_genomes, genome_length=genome_length,
-                                        num_generators=num_generators,
-                                        random_seed=random_seed)
     
-    generator = MixGenerator(generators, num_genomes)
-    
+    generators = get_liner_generator(num_genomes=num_genomes, genome_length=genome_length,
+                                     num_generators=num_generators,
+                                     random_seed=random_seed)
+        
     serial_generator = trax.data.Serial(
         trax.data.Batch(batch_size)
-    )(generator)
+    )(generators)
     
     return serial_generator
 
@@ -101,7 +95,7 @@ class MixGenerator:
     
     def __next__(self):
         if self.i < self.total_examples:
-            random_gen_index = random.randint(0, len(self.list_of_generators)-1)
+            random_gen_index = random.randint(0, len(self.list_of_generators) - 1)
             generator = self.list_of_generators[random_gen_index]
             sample = next(generator)
             
@@ -111,7 +105,7 @@ class MixGenerator:
             if self.counter[random_gen_index] == self.examples_in_one_gen:
                 self.list_of_generators.remove(generator)
             
-            return sample
+            yield sample
         else:
             raise StopIteration
 

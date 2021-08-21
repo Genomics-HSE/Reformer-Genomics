@@ -7,8 +7,8 @@ from .custom_encoder_block import EncoderBlock
 from .custom_positional_encoding import PositionalEncoding
 
 
-def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation,
-                  ff_dropout, n_layers, max_len, filters, kernel_size, stride, mode='train'):
+def ReformerModel(embedding_obj, d_model, d_ff, n_heads, attention_type, dropout, ff_activation,
+                  ff_dropout, n_layers, max_len, output_dim, mode='train'):
     encoder_blocks = [EncoderBlock(d_model=d_model,
                                    d_ff=d_ff,
                                    n_heads=n_heads,
@@ -20,19 +20,30 @@ def ReformerModel(d_model, d_ff, n_heads, attention_type, dropout, ff_activation
                                    ) for _ in range(n_layers)]
     
     encoder = tl.Serial(
-        ExpandDim(),
-        #Printer(),
-        tl.Conv1d(filters=filters, kernel_size=kernel_size, stride=stride, padding="SAME"),
-        PositionalEncoding(max_len=max_len, mode=mode),
+        embedding_obj,
+        #PositionalEncoding(max_len=max_len, mode=mode),
+        tl.PositionalEncoding(mode=mode),
         tl.Dense(d_model),
         tl.Dup(),
         tl.ReversibleSerial(encoder_blocks),
         tl.Concatenate(),
-        tl.Dense(32),
+        tl.Dense(output_dim),
+        tl.Relu(),
+        tl.Dense(output_dim),
         tl.LogSoftmax(),
     )
     
     return encoder
+
+
+def CNNEmbedding(filters, kernel_size, stride):
+    emb = tl.Conv1d(filters=filters, kernel_size=kernel_size, stride=stride, padding="SAME"),
+    return emb
+
+
+def Embedding(vocab_size, d_model):
+    emb = tl.Embedding(vocab_size, d_model)
+    return emb
 
 
 def GruModel(d_model, vocab_size, n_units, mode):
@@ -86,7 +97,6 @@ def ExpandDim():
     layer_name = "ExpandDim"
     
     def func(x):
-        x = x.astype(jnp.float32)
         return jnp.expand_dims(x, axis=-1)  # , jnp.expand_dims(y, axis=2)
     
     return tl.Fn(layer_name, func, n_out=1)
